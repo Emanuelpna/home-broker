@@ -31,7 +31,7 @@ func NewTransaction(sellingOrder *Order, buyingOrder *Order, shares int, price f
 }
 
 func (t *Transaction) CalculateTotal(shares int, price float64) {
-	t.Total = float64(t.Shares) * price
+	t.Total = float64(t.Shares) * t.Price
 }
 
 func (t *Transaction) AddBuyingOrderPendingShares(shares int) {

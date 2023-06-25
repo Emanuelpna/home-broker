@@ -24,20 +24,32 @@ func NewBook(ordersChannelInput chan *Order, ordersChannelOutput chan *Order, wa
 }
 
 func (b *Book) Trade() {
-	buyOrders := NewOrderQueue()
-	sellOrders := NewOrderQueue()
-
-	heap.Init(buyOrders)
-	heap.Init(sellOrders)
+	buyOrders := make(map[string]*OrderQueue)
+	sellOrders := make(map[string]*OrderQueue)
 
 	for order := range b.OrdersChannelInput {
+		asset := order.Asset.ID
+
+		if buyOrders[asset] == nil {
+			buyOrders[asset] = NewOrderQueue()
+			heap.Init(buyOrders[asset])
+		}
+
+		if sellOrders[asset] == nil {
+			sellOrders[asset] = NewOrderQueue()
+			heap.Init(sellOrders[asset])
+		}
+
+		buyOrderAsset := buyOrders[asset]
+		sellOrderAsset := sellOrders[asset]
+
 		// É um pedido de COMPRA de ação
 		if order.OrderType == "BUY" {
-			buyOrders.Push(order)
+			buyOrderAsset.Push(order)
 
 			// Existem pedidos de VENDA e tem o mesmo preço que o pedido de COMPRA
-			if sellOrders.Len() > 0 && sellOrders.Orders[0].Price <= order.Price {
-				sellOrder := sellOrders.Pop().(*Order)
+			if sellOrderAsset.Len() > 0 && sellOrderAsset.Orders[0].Price <= order.Price {
+				sellOrder := sellOrderAsset.Pop().(*Order)
 
 				// Existem cotas sobrando para serem transacionadas
 				if sellOrder.PendingShares > 0 {
@@ -52,16 +64,16 @@ func (b *Book) Trade() {
 					b.OrdersChannelOutput <- order
 
 					if sellOrder.PendingShares > 0 {
-						sellOrders.Push(sellOrder)
+						sellOrderAsset.Push(sellOrder)
 					}
 				}
 			}
 		} else if order.OrderType == "SELL" {
-			sellOrders.Push(order)
+			sellOrderAsset.Push(order)
 
 			// Existem pedidos de VENDA e tem o mesmo preço que o pedido de COMPRA
-			if buyOrders.Len() > 0 && buyOrders.Orders[0].Price >= order.Price {
-				buyOrder := buyOrders.Pop().(*Order)
+			if buyOrderAsset.Len() > 0 && buyOrderAsset.Orders[0].Price >= order.Price {
+				buyOrder := buyOrderAsset.Pop().(*Order)
 
 				// Existem cotas sobrando para serem transacionadas
 				if buyOrder.PendingShares > 0 {
@@ -77,7 +89,7 @@ func (b *Book) Trade() {
 
 					// Manda de volta pra fila se ainda continua tem cotas sobrando
 					if buyOrder.PendingShares > 0 {
-						buyOrders.Push(buyOrder)
+						buyOrderAsset.Push(buyOrder)
 					}
 				}
 			}
