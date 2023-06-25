@@ -13,7 +13,7 @@ async function bootstrap() {
         brokers: ['host.docker.internal:9094'],
       },
       consumer: {
-        groupId: 'orders-cosumer',
+        groupId: 'orders-consumer',
       },
     },
   });
