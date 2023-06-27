@@ -4,6 +4,7 @@ import { TabsGroup, TabsItem, Card } from "@/components/flowbite-components";
 import { MyOrders } from "@/components/MyOrders/MyOrders";
 import { OrderForm } from "@/components/OrderForm/OrderForm";
 import { ChartComponent } from "@/components/charts/ChartComponent/ChartComponent";
+import { SyncOrders } from "@/components/SyncOrders/SyncOrders";
 
 type HomePageProps = {
   params: { wallet_id: string; asset_id: string };
@@ -49,7 +50,11 @@ export default async function HomeBrokerPage({ params }: HomePageProps) {
               },
             }}
           >
-            <MyOrders wallet_id={params.wallet_id}></MyOrders>
+            <SyncOrders wallet_id={params.wallet_id}>
+              <div className="max-h-96 overflow-y-auto overflow-hidden">
+                <MyOrders wallet_id={params.wallet_id} />
+              </div>
+            </SyncOrders>
           </Card>
         </div>
 

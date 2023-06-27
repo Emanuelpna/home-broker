@@ -1,14 +1,24 @@
 import { Module } from '@nestjs/common';
+import { ConfigModule } from '@nestjs/config';
+import { MongooseModule } from '@nestjs/mongoose';
 
 import { AppService } from './app.service';
 import { AppController } from './app.controller';
+
 import { PrismaModule } from './prisma/prisma.module';
 import { AssetsModule } from './assets/assets.module';
-import { WalletsModule } from './wallets/wallets.module';
 import { OrdersModule } from './orders/orders.module';
+import { WalletsModule } from './wallets/wallets.module';
 
 @Module({
-  imports: [PrismaModule, AssetsModule, WalletsModule, OrdersModule],
+  imports: [
+    ConfigModule.forRoot(),
+    PrismaModule,
+    AssetsModule,
+    WalletsModule,
+    OrdersModule,
+    MongooseModule.forRoot(process.env.DATABASE_URL),
+  ],
   controllers: [AppController],
   providers: [AppService],
 })
